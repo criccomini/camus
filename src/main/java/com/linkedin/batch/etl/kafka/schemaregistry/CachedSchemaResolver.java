@@ -20,28 +20,27 @@ public class CachedSchemaResolver implements SchemaResolver {
 
     // The context is passed to instantiate to get any parameters from the
     // hadoop-conf to create the registry client
-    public CachedSchemaResolver(TaskAttemptContext context, String topicName) throws SchemaRegistryException {
+    public CachedSchemaResolver(TaskAttemptContext context, String topicName)
+            throws SchemaRegistryException {
         if (registry == null) {
-               @SuppressWarnings("rawtypes")
+            @SuppressWarnings("rawtypes")
             Constructor constructor = null;
             try {
-                constructor = Class.forName(EtlInputFormat.getSchemaRegistryType(context)).getConstructor(new Class[]{JobContext.class});
-                registry = (SchemaRegistryClient)constructor.newInstance(context);
-            } catch (Exception e)
-            {
-                throw new SchemaRegistryException("Error in creating the specified schema registry object");
+                constructor = Class.forName(EtlInputFormat.getSchemaRegistryType(context))
+                        .getConstructor(JobContext.class);
+                registry = (SchemaRegistryClient) constructor.newInstance(context);
+            } catch (Exception e) {
+                throw new SchemaRegistryException("Failed in creating the schema registry object");
             }
         }
-        
     }
 
     public String resolve(SchemaRegistryClient registry, String topicName) {
         String targetSchema = registry.getLatestSchemaByName(topicName);
-        return targetSchema;                                                                           
+        return targetSchema;
     }
-    
-    public Schema resolve(byte[] bs)
-    {
+
+    public Schema resolve(byte[] bs) {
         Schema schema = cache.get(bs.toString());
         if (schema != null)
             return schema;
@@ -50,9 +49,10 @@ public class CachedSchemaResolver implements SchemaResolver {
             schema = Schema.parse(s);
             cache.put(bs.toString(), schema);
         } catch (Exception e) {
-            throw new RuntimeException("Error while resolving schema id:" + bs.toString() + " msg:" + e.getMessage());
+            throw new RuntimeException("Error while resolving schema id:" + bs.toString() + " msg:"
+                    + e.getMessage());
         }
-        return schema;  
+        return schema;
     }
 
 }

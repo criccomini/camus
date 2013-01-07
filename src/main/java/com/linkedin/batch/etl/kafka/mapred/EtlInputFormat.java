@@ -61,11 +61,15 @@ public class EtlInputFormat extends InputFormat<EtlKey, AvroWrapper<Object>> {
             ArrayList<String> topicList = (ArrayList<String>) getTopicsList(context);
             HashMap<String, List<EtlRequest>> partitionInfo;
             partitionInfo = KafkaClient.loadKafkaMetadata(topicList);
-
+            SchemaRegistryClient registry = null;
+            try{
             Constructor constructor = Class.forName(EtlInputFormat.getSchemaRegistryType(context))
-                    .getConstructor(new Class[] { JobContext.class });
-            SchemaRegistryClient registry = (SchemaRegistryClient) constructor.newInstance(context);
-
+                    .getConstructor(JobContext.class);
+            registry = (SchemaRegistryClient) constructor.newInstance(context);
+            }catch(Exception e){
+                System.err.println("Failed to create schema registry using dynamic constructor");
+                e.printStackTrace(); 
+            }
             requests = new ArrayList<EtlRequest>();
             for (String topic : topicList) {
                 try {
@@ -484,32 +488,12 @@ public class EtlInputFormat extends InputFormat<EtlKey, AvroWrapper<Object>> {
         return job.getConfiguration().get(EtlJob.SCHEMA_REGISTRY_TYPE);
     }
 
-    public static String getJDBCSchemaRegistryURL(JobContext job) {
-        return job.getConfiguration().get(EtlJob.JDBC_SCHEMA_REGISTRY_URL);
-    }
-
-    public static String getJDBCSchemaRegistryUser(JobContext job) {
-        return job.getConfiguration().get(EtlJob.JDBC_SCHEMA_REGISTRY_USER);
-    }
-
-    public static String getJDBCSchemaRegistryDriver(JobContext job) {
-        return job.getConfiguration().get(EtlJob.JDBC_SCHEMA_REGISTRY_DRIVER);
-    }
-
-    public static String getJDBCSchemaRegistryPassword(JobContext job) {
-        return job.getConfiguration().get(EtlJob.JDBC_SCHEMA_REGISTRY_PASSWORD);
-    }
-
     public static String getValidatorClassName(JobContext job) {
         return job.getConfiguration().get(EtlJob.SCHEMA_REGISTRY_VALIDATOR_CLASS_NAME);
     }
 
     public static String getIdGeneratorClassName(JobContext job) {
         return job.getConfiguration().get(EtlJob.SCHEMA_REGISTRY_IDGENERATOR_CLASS_NAME);
-    }
-
-    public static String getEtlSchemaRegistryPoolSize(JobContext job) {
-        return job.getConfiguration().get(EtlJob.JDBC_SCHEMA_REGISTRY_POOL_SIZE);
     }
 
     private class OffsetFileFilter implements PathFilter {

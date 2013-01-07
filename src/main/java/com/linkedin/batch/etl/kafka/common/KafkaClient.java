@@ -45,7 +45,7 @@ public class KafkaClient
   {
       //Host name and the port number need to be specified
     SimpleConsumer consumer =
-        new SimpleConsumer("host_name", -1, 30000, 1024 * 1024, null);
+        new SimpleConsumer("host_name", -1, 30000, 1024 * 1024, EtlJob.getKafkaClientName());
 
 
     int retries = 3;
@@ -148,7 +148,7 @@ public class KafkaClient
 
     // This needs confirmation from Joel as to if "0" is a perfectly valid option or not
     FetchRequest fetchRequest =
-        new FetchRequest(-1, "hadoop-etl", nodeId, 0, 0, fetchInfo);
+        new FetchRequest(-1, EtlJob.getKafkaClientName(), nodeId, 0, 0, fetchInfo);
     FetchResponse fetchResponse = simpleConsumer.fetch(fetchRequest);
     return fetchResponse;
   }

@@ -18,6 +18,8 @@ import kafka.message.MessageAndOffset;
 
 import org.apache.hadoop.io.BytesWritable;
 
+import com.linkedin.batch.etl.kafka.EtlJob;
+
 /**
  * Poorly named class that handles kafka pull events within each
  * KafkaRecordReader.
@@ -62,7 +64,7 @@ public class KafkaReader {
 
 		// read data from queue
 		URI uri = kafkaRequest.getURI();
-		simpleConsumer = new SimpleConsumer(uri.getHost(), uri.getPort(), clientTimeout, fetchBufferSize, null);
+		simpleConsumer = new SimpleConsumer(uri.getHost(), uri.getPort(), clientTimeout, fetchBufferSize, EtlJob.getKafkaClientName());
 		
 		fetch();
 

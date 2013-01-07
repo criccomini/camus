@@ -17,6 +17,8 @@ import kafka.javaapi.consumer.SimpleConsumer;
 import org.apache.hadoop.io.UTF8;
 import org.apache.hadoop.io.Writable;
 
+import com.linkedin.batch.etl.kafka.EtlJob;
+
 /**
  * A class that represents the kafka pull request.
  * 
@@ -215,13 +217,13 @@ public class EtlRequest implements Writable {
 
         if (this.earliestOffset == -2 && uri != null) {
             SimpleConsumer consumer = new SimpleConsumer(uri.getHost(), uri.getPort(), 30000,
-                    1024 * 1024, null);
+                    1024 * 1024, EtlJob.getKafkaClientName());
 
             Map<TopicAndPartition, PartitionOffsetRequestInfo> offsetInfo = new HashMap<TopicAndPartition, PartitionOffsetRequestInfo>();
             offsetInfo.put(new TopicAndPartition(topic, partition), new PartitionOffsetRequestInfo(
                     kafka.api.OffsetRequest.EarliestTime(), 1));
             OffsetResponse response = consumer.getOffsetsBefore(new OffsetRequest(offsetInfo,
-                    kafka.api.OffsetRequest.CurrentVersion(), "hadoop-etl-<colo>"));
+                    kafka.api.OffsetRequest.CurrentVersion(), EtlJob.getKafkaClientName()));
 
             long[] endOffset = response.offsets(topic, partition);
             consumer.close();
@@ -242,13 +244,13 @@ public class EtlRequest implements Writable {
 
     public long getLastOffset(long time) {
         SimpleConsumer consumer = new SimpleConsumer(uri.getHost(), uri.getPort(), 30000,
-                1024 * 1024, null);
+                1024 * 1024, EtlJob.getKafkaClientName());
         Map<TopicAndPartition, PartitionOffsetRequestInfo> offsetInfo = new HashMap<TopicAndPartition, PartitionOffsetRequestInfo>();
         offsetInfo.put(new TopicAndPartition(topic, partition), new PartitionOffsetRequestInfo(
                 time, 1));
         // VersionId and clientId needed here??? What parameters are these?
         OffsetResponse response = consumer.getOffsetsBefore(new OffsetRequest(offsetInfo,
-                kafka.api.OffsetRequest.CurrentVersion(), "hadoop-etl-<colo>"));
+                kafka.api.OffsetRequest.CurrentVersion(), EtlJob.getKafkaClientName()));
         long[] endOffset = response.offsets(topic, partition);
         // long[] endOffset = consumer.getOffsetsBefore(topic, partition, time,
         // 1);

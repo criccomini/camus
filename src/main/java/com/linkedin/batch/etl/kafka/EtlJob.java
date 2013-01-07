@@ -124,23 +124,18 @@ public class EtlJob extends AbstractHadoopJob
 
   public static final String SCHEMA_REGISTRY_TYPE                   =
                                                                         "etl.kafka.schemaregistry.type";
-  public static final String JDBC_SCHEMA_REGISTRY_USER              =
-                                                                        "etl.kafka.schemaregistry.jdbc.user";
-  public static final String JDBC_SCHEMA_REGISTRY_PASSWORD          =
-                                                                        "etl.kafka.schemaregistry.jdbc.password";
-  public static final String JDBC_SCHEMA_REGISTRY_URL               =
-                                                                        "etl.kafka.schemaregistry.jdbc.url";
-  public static final String JDBC_SCHEMA_REGISTRY_POOL_SIZE         =
-                                                                        "etl.kafka.schemaregistry.jdbc.pool.size";
-  public static final String JDBC_SCHEMA_REGISTRY_DRIVER            =
-                                                                        "etl.kafka.schemaregistry.jdbc.driverClassName";
   public static final String SCHEMA_REGISTRY_VALIDATOR_CLASS_NAME   =
                                                                         "etl.kafka.schemaregistry.validator.class.name";
   public static final String SCHEMA_REGISTRY_IDGENERATOR_CLASS_NAME =
                                                                         "etl.kafka.schemaregistry.idgenerator.class.name";
-
+  
+  public static final String KAFKA_CLIENT_NAME = "etl.kafka.client.name";
+  public static String kafkaClientName = null;
+  
   private final Props        props;
 
+  
+  
   public EtlJob(String id, Props props) throws IOException
   {
     super(id, props);
@@ -221,7 +216,10 @@ public class EtlJob extends AbstractHadoopJob
     info("The whitelisted topics: "
         + Arrays.toString(EtlInputFormat.getKafkaWhitelistTopic(job)));
     info("Dir Destination set to: " + EtlMultiOutputFormat.getDestinationPath(job));
-
+    
+    //Setting the kafka Client Name
+    kafkaClientName = job.getConfiguration().get(EtlJob.KAFKA_CLIENT_NAME);
+    
     info("Getting the base paths.");
 
     Path execBasePath = EtlInputFormat.getEtlExecutionBasePath(job);
@@ -293,6 +291,8 @@ public class EtlJob extends AbstractHadoopJob
     job.setOutputKeyClass(EtlKey.class);
     job.setOutputValueClass(AvroWrapper.class);
 
+    
+    
     stopTiming("pre-setup");
     super.run(job, false);
     stopTiming("hadoop");
@@ -527,6 +527,12 @@ public class EtlJob extends AbstractHadoopJob
     info(sb.toString());
   }
 
+  public static String getKafkaClientName()
+  {
+      return kafkaClientName;
+  }
+  
+  
   /**
    * Path filter that filters based on prefix
    */
