@@ -1,5 +1,6 @@
 .classpath
 .project
+target
 
 # target dirs
 camus-api/target/
