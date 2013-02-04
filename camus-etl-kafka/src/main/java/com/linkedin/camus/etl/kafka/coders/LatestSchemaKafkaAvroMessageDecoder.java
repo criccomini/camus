@@ -5,7 +5,6 @@ import kafka.message.Message;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericDatumReader;
-import org.apache.hadoop.conf.Configuration;
 
 import com.linkedin.camus.coders.CamusWrapper;
 
